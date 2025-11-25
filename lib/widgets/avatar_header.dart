@@ -15,34 +15,53 @@ class AvatarHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
       child: Row(
         children: [
-          CircleAvatar(radius: 26, backgroundImage: avatar),
-          const SizedBox(width: 12),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircleAvatar(radius: 28, backgroundImage: avatar),
+          ),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Hello!',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: Colors.black54),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: const TextStyle(
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                  letterSpacing: -0.5,
                 ),
               ),
             ],
           ),
-          const Spacer(),
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: const Icon(Icons.brightness_6),
-          ),
+          // Removed theme toggle button to match design strictly if needed,
+          // but keeping it invisible or removed if not in design.
+          // The design doesn't show a theme toggle, so I'll remove it visually or keep it hidden.
+          // For now, I'll assume we want to keep the functionality but maybe move it or hide it.
+          // The user said "pixel perfect", the design has no theme toggle.
+          // I will remove it from the visual tree.
         ],
       ),
     );

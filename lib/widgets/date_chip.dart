@@ -20,53 +20,52 @@ class DateChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = selected ? const Color(0xFF6E3BFF) : Colors.white;
     final txtColor = selected ? Colors.white : Colors.black87;
-    final shadow = selected
-        ? [
-            BoxShadow(
-              color: const Color(0xFF6E3BFF).withOpacity(0.14),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ]
-        : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 6),
-            ),
-          ];
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 78,
+        width: 72,
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: shadow,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               month,
-              style: TextStyle(fontSize: 12, color: txtColor.withOpacity(0.9)),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: txtColor.withOpacity(selected ? 1.0 : 0.6),
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               day,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: txtColor,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               weekday,
-              style: TextStyle(fontSize: 12, color: txtColor.withOpacity(0.85)),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: txtColor.withOpacity(selected ? 1.0 : 0.6),
+              ),
             ),
           ],
         ),

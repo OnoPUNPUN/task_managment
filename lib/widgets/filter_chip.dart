@@ -18,25 +18,19 @@ class ReusableFilterChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF6E3BFF) : const Color(0xFFF0EEFF),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFF6E3BFF).withOpacity(0.14),
-                    blurRadius: 10,
-                    offset: const Offset(0, 6),
-                  ),
-                ]
-              : null,
+          color: selected ? const Color(0xFF6E3BFF) : const Color(0xFFF2F0FF),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : const Color(0xFF5A5A6A),
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : const Color(0xFF6E3BFF),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
