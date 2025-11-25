@@ -37,6 +37,15 @@ class TodoRepository {
     }
   }
 
+  Future<Todo> updateTodo(int id, String text) async {
+    try {
+      final res = await _client.put('/todos/$id', data: {'todo': text});
+      return Todo.fromJson(res.data as Map<String, dynamic>);
+    } catch (e) {
+      throw ApiException(e.toString());
+    }
+  }
+
   Future<Todo> updateTodoStatus(int id, bool completed) async {
     try {
       final res = await _client.put(

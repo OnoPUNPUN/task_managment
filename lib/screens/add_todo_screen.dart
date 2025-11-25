@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../providers/todo_provider.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/app_bottom_button.dart';
+import '../models/todo.dart';
 
 class AddTodoScreen extends ConsumerStatefulWidget {
-  const AddTodoScreen({super.key});
+  final Todo? todo;
+  const AddTodoScreen({super.key, this.todo});
 
   @override
   ConsumerState<AddTodoScreen> createState() => _AddTodoScreenState();
@@ -19,23 +22,40 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   final List<Map<String, dynamic>> _categories = [
     {
       'name': 'To-do',
-      'icon': Icons.calendar_today,
-      'color': Colors.blue,
-      'bg': Colors.blue.withOpacity(0.1),
+      'icon': Iconsax.clipboard_text,
+      'color': const Color(0xFF0085FF),
+      'bg': const Color(0xFFE6F2FF),
     },
     {
       'name': 'In Progress',
-      'icon': Icons.work,
-      'color': Colors.orange,
-      'bg': Colors.orange.withOpacity(0.1),
+      'icon': Iconsax.clock,
+      'color': const Color(0xFFFF7D53),
+      'bg': const Color(0xFFFFEFEB),
     },
     {
       'name': 'Completed',
-      'icon': Icons.check_circle,
-      'color': Colors.green,
-      'bg': Colors.green.withOpacity(0.1),
+      'icon': Iconsax.tick_circle,
+      'color': const Color(0xFF6E3BFF),
+      'bg': const Color(0xFFEBE5FF),
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.todo != null) {
+      _ctrl.text = widget.todo!.todo;
+      if (widget.todo!.completed) {
+        _selectedCategory = 'Completed';
+      } else {
+        if (widget.todo!.id % 2 == 0) {
+          _selectedCategory = 'In Progress';
+        } else {
+          _selectedCategory = 'To-do';
+        }
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -44,18 +64,33 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   }
 
   Future<void> _submit() async {
-    final text = _ctrl.text.trim();
-    if (text.isEmpty) return;
+    if (_ctrl.text.trim().isEmpty) return;
+
     setState(() => _loading = true);
 
-    await ref
-        .read(todoListProvider.notifier)
-        .addTodo(text, status: _selectedCategory);
+    try {
+      if (widget.todo != null) {
+        await ref
+            .read(todoListProvider.notifier)
+            .updateTodo(widget.todo!.id, _ctrl.text.trim(), _selectedCategory);
 
-    setState(() => _loading = false);
-    if (mounted) {
-      CustomSnackbar.show(context, 'Task added successfully');
-      Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+          CustomSnackbar.show(context, 'Task updated successfully!');
+        }
+      } else {
+        await ref.read(todoListProvider.notifier).addTodo(_ctrl.text.trim());
+        if (mounted) {
+          Navigator.pop(context);
+          CustomSnackbar.show(context, 'Task added successfully!');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomSnackbar.show(context, 'Error: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -137,11 +172,11 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                         ),
                       ),
                     ),
-                    const Text(
-                      'Add Task',
-                      style: TextStyle(
+                    Text(
+                      widget.todo != null ? 'Edit Task' : 'Add Task',
+                      style: const TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
@@ -276,7 +311,9 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
 
               // Bottom Button
               AppBottomButton(
-                text: _loading ? 'Adding...' : 'Add',
+                text: _loading
+                    ? (widget.todo != null ? 'Saving...' : 'Adding...')
+                    : (widget.todo != null ? 'Save' : 'Add'),
                 onPressed: _loading ? () {} : _submit,
                 hasArrow: false,
               ),
