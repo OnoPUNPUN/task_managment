@@ -20,11 +20,26 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
   int _selectedDateIndex = 2;
   String _selectedFilter = 'All';
   late int _avatarId;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _avatarId = Random().nextInt(70);
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(todoListProvider.notifier).loadMore();
+    }
   }
 
   List<DateTime> _dates() {
@@ -113,14 +128,32 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                     final filtered = _applyFilter(list);
                     if (filtered.isEmpty)
                       return const Center(child: Text('No tasks found'));
+
                     return RefreshIndicator(
-                      onRefresh: () =>
-                          ref.read(todoListProvider.notifier).loadTodos(),
+                      onRefresh: () => ref
+                          .read(todoListProvider.notifier)
+                          .loadTodos(refresh: true),
                       child: ListView.separated(
+                        controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
-                        itemCount: filtered.length,
+                        itemCount: filtered.length + 1, // +1 for loader
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (ctx, i) {
+                          if (i == filtered.length) {
+                            // Bottom loader
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
                           final Todo t = filtered[i];
                           return TodoCard(
                             todo: t,
@@ -140,8 +173,9 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                         Text('Error: ${e.toString()}'),
                         const SizedBox(height: 10),
                         ElevatedButton(
-                          onPressed: () =>
-                              ref.read(todoListProvider.notifier).loadTodos(),
+                          onPressed: () => ref
+                              .read(todoListProvider.notifier)
+                              .loadTodos(refresh: true),
                           child: const Text('Retry'),
                         ),
                       ],
