@@ -19,6 +19,13 @@ class TodoListScreen extends ConsumerStatefulWidget {
 class _TodoListScreenState extends ConsumerState<TodoListScreen> {
   int _selectedDateIndex = 2;
   String _selectedFilter = 'All';
+  late int _avatarId;
+
+  @override
+  void initState() {
+    super.initState();
+    _avatarId = Random().nextInt(70);
+  }
 
   List<DateTime> _dates() {
     final now = DateTime.now();
@@ -47,7 +54,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
               AvatarHeader(
                 name: 'Livia Vaccaro',
                 avatar: NetworkImage(
-                  'https://i.pravatar.cc/150?img=${Random().nextInt(70)}',
+                  'https://i.pravatar.cc/150?img=$_avatarId',
                 ),
                 onToggleTheme: () =>
                     ref.read(themeNotifierProvider.notifier).toggle(),
@@ -171,11 +178,13 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
     }
 
     if (_selectedFilter == 'To do') {
-      return list.where((t) => !t.completed).toList();
+      // Matches TodoCard logic: !completed && id % 2 != 0
+      return list.where((t) => !t.completed && t.id % 2 != 0).toList();
     }
 
     if (_selectedFilter == 'In Progress') {
-      return list.where((t) => !t.completed).toList();
+      // Matches TodoCard logic: !completed && id % 2 == 0
+      return list.where((t) => !t.completed && t.id % 2 == 0).toList();
     }
 
     return list;
