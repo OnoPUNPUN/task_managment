@@ -38,11 +38,11 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
     final themeMode = ref.watch(themeNotifierProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white, // Fallback
+      backgroundColor: Colors.white,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFF3F8FF), Color(0xFFFFFBF3)], // Subtle gradient
+            colors: [Color(0xFFF3F8FF), Color(0xFFFFFBF3)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

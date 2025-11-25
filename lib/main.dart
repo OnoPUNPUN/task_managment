@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_managment/screens/todo_list_screen.dart';
-import 'screens/onboarding_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
