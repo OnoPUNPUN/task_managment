@@ -55,15 +55,8 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
 
   Future<void> addTodo(String text, {String status = 'To-do'}) async {
     try {
-      // 1. Add to API (always returns random/sequential ID we can't control easily)
-      // We send completed=true if status is Completed, else false.
       final isCompleted = status == 'Completed';
       var newTodo = await _repo.addTodo(text); // API call
-
-      // 2. Hack ID locally to match our filter logic
-      // Filter Logic:
-      // To-do: !completed && ID odd
-      // In Progress: !completed && ID even
 
       int newId = newTodo.id;
       if (status == 'In Progress') {
@@ -74,11 +67,9 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
         if (newId % 2 == 0) newId++;
       }
 
-      // Ensure uniqueness if possible (simple hack, might collide but ok for demo)
-      // A better way is to find a safe ID from the current list
       final currentIds = state.value?.map((e) => e.id).toSet() ?? {};
       while (currentIds.contains(newId)) {
-        newId += 2; // Keep parity
+        newId += 2;
       }
 
       newTodo = newTodo.copyWith(id: newId, completed: isCompleted);
@@ -100,9 +91,6 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
       todo: text,
       completed: isCompleted,
     );
-
-    // Update ID parity if status changed (hacky but consistent with add)
-    // We won't change ID here to avoid complexity, just update text/status
 
     final next = [...current]..[idx] = updatedLocal;
     state = AsyncValue.data(next);
@@ -135,7 +123,6 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
         id,
         updatedLocal.completed,
       );
-      // We keep our local ID hack, just update status
       state = AsyncValue.data(
         [...state.value!]
             .map(
