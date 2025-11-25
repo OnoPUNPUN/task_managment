@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_managment/screens/add_todo_screen.dart';
 import 'package:task_managment/screens/todo_list_screen.dart';
 import 'package:task_managment/screens/onboarding_screen.dart';
+import 'package:task_managment/models/todo.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -23,7 +24,10 @@ class MyApp extends StatelessWidget {
       home: const OnboardingScreen(),
       routes: {
         '/home': (context) => const TodoListScreen(),
-        '/add': (context) => const AddTodoScreen(),
+        '/add': (context) {
+          final todo = ModalRoute.of(context)!.settings.arguments as Todo?;
+          return AddTodoScreen(todo: todo);
+        },
       },
     );
   }

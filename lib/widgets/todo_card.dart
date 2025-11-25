@@ -43,7 +43,7 @@ class TodoCard extends StatelessWidget {
           bodyBuilder: (context) => _TodoMenuItems(todo: todo),
           direction: PopoverDirection.bottom,
           width: 150,
-          height: 100,
+          height: 120,
           arrowHeight: 15,
           arrowWidth: 30,
         );
