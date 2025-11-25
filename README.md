@@ -138,7 +138,7 @@ flutter run
 
 ## 👤 Author
 
-**Livia Vaccaro**
+**PUNPUN**
 
 GitHub: [@OnoPUNPUN](https://github.com/OnoPUNPUN)
 
