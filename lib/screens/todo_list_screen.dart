@@ -8,6 +8,7 @@ import '../widgets/filter_chip.dart';
 import '../widgets/loading.dart';
 import '../widgets/todo_card.dart';
 import '../models/todo.dart';
+import '../utils/app_date_utils.dart';
 import 'dart:math';
 
 class TodoListScreen extends ConsumerStatefulWidget {
@@ -42,15 +43,11 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
     }
   }
 
-  List<DateTime> _dates() {
-    final now = DateTime.now();
-    return List.generate(5, (i) => now.add(Duration(days: i - 2)));
-  }
-
   @override
   Widget build(BuildContext context) {
     final todosAsync = ref.watch(todoListProvider);
-    final themeMode = ref.watch(themeNotifierProvider);
+    final todoService = ref.watch(todoServiceProvider);
+    final dates = generateSurroundingDates(anchor: DateTime.now());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -76,20 +73,19 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Dates
               SizedBox(
                 height: 120,
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   scrollDirection: Axis.horizontal,
-                  itemCount: _dates().length,
+                  itemCount: dates.length,
                   itemBuilder: (_, idx) {
-                    final d = _dates()[idx];
+                    final d = dates[idx];
                     final sel = idx == _selectedDateIndex;
                     return DateChip(
-                      month: _shortMonth(d.month),
+                      month: shortMonth(d.month),
                       day: '${d.day}',
-                      weekday: _weekdayShort(d.weekday),
+                      weekday: weekdayShort(d.weekday),
                       selected: sel,
                       onTap: () => setState(() => _selectedDateIndex = idx),
                     );
@@ -100,7 +96,6 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
 
               const SizedBox(height: 24),
 
-              // Filters
               SizedBox(
                 height: 50,
                 child: ListView.separated(
@@ -125,7 +120,10 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
               Expanded(
                 child: todosAsync.when(
                   data: (list) {
-                    final filtered = _applyFilter(list);
+                    final filtered = todoService.filterTodos(
+                      list,
+                      _selectedFilter,
+                    );
                     if (filtered.isEmpty)
                       return const Center(child: Text('No tasks found'));
 
@@ -140,7 +138,6 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (ctx, i) {
                           if (i == filtered.length) {
-                            // Bottom loader
                             return const Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Center(
@@ -203,47 +200,5 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
         ),
       ),
     );
-  }
-
-  List<Todo> _applyFilter(List<Todo> list) {
-    if (_selectedFilter == 'All') return list;
-    if (_selectedFilter == 'Completed') {
-      return list.where((t) => t.completed).toList();
-    }
-
-    if (_selectedFilter == 'To do') {
-      // Matches TodoCard logic: !completed && id % 2 != 0
-      return list.where((t) => !t.completed && t.id % 2 != 0).toList();
-    }
-
-    if (_selectedFilter == 'In Progress') {
-      // Matches TodoCard logic: !completed && id % 2 == 0
-      return list.where((t) => !t.completed && t.id % 2 == 0).toList();
-    }
-
-    return list;
-  }
-
-  String _shortMonth(int m) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[m - 1];
-  }
-
-  String _weekdayShort(int w) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[(w - 1) % 7];
   }
 }

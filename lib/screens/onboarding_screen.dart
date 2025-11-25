@@ -27,13 +27,13 @@ class OnboardingScreen extends StatelessWidget {
               width: 50,
             ),
           ),
-          // Left Middle - Pie Chart
+
           Positioned(
             top: 280,
             left: 60,
             child: Image.asset("assets/onBorading/pie_chart.png", width: 50),
           ),
-          // Bottom Left - Vase
+
           Stack(
             children: [
               Positioned(
@@ -54,7 +54,7 @@ class OnboardingScreen extends StatelessWidget {
               ),
             ],
           ),
-          // Right Middle - Notifications
+
           Positioned(
             top: 380,
             left: 305,
@@ -64,14 +64,12 @@ class OnboardingScreen extends StatelessWidget {
             ),
           ),
 
-          /// MAIN CONTENT
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(flex: 2),
 
-                /// HERO IMAGE
                 Image.asset(
                   "assets/onBorading/female.png",
                   height: 300,
@@ -80,7 +78,6 @@ class OnboardingScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                /// TITLE
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
@@ -99,7 +96,6 @@ class OnboardingScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                /// SUBTITLE
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30),
                   child: Text(
@@ -115,7 +111,6 @@ class OnboardingScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                /// BUTTON
                 AppBottomButton(
                   text: 'Let’s Start',
                   onPressed: () {

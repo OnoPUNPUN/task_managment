@@ -2,7 +2,6 @@ import '../core/api_client.dart';
 import '../core/exceptions.dart';
 import '../models/todo.dart';
 
-// This is my Area 🩻🩻
 class TodoRepository {
   final ApiClient _client = ApiClient();
 

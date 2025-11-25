@@ -5,8 +5,16 @@ import 'package:task_managment/screens/todo_list_screen.dart';
 import 'package:task_managment/screens/onboarding_screen.dart';
 import 'package:task_managment/models/todo.dart';
 
-void main() {
+import 'package:permission_handler/permission_handler.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _requestPermissions();
   runApp(const ProviderScope(child: MyApp()));
+}
+
+Future<void> _requestPermissions() async {
+  await [Permission.location, Permission.storage].request();
 }
 
 class MyApp extends StatelessWidget {

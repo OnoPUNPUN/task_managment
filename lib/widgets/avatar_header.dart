@@ -56,12 +56,6 @@ class AvatarHeader extends StatelessWidget {
               ),
             ],
           ),
-          // Removed theme toggle button to match design strictly if needed,
-          // but keeping it invisible or removed if not in design.
-          // The design doesn't show a theme toggle, so I'll remove it visually or keep it hidden.
-          // For now, I'll assume we want to keep the functionality but maybe move it or hide it.
-          // The user said "pixel perfect", the design has no theme toggle.
-          // I will remove it from the visual tree.
         ],
       ),
     );

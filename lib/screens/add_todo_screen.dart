@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../providers/todo_provider.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/app_bottom_button.dart';
 import '../models/todo.dart';
+import '../constants/todo_categories.dart';
 
 class AddTodoScreen extends ConsumerStatefulWidget {
   final Todo? todo;
@@ -17,43 +17,16 @@ class AddTodoScreen extends ConsumerStatefulWidget {
 class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   final _ctrl = TextEditingController();
   bool _loading = false;
-  String _selectedCategory = 'To-do';
-
-  final List<Map<String, dynamic>> _categories = [
-    {
-      'name': 'To-do',
-      'icon': Iconsax.clipboard_text,
-      'color': const Color(0xFF0085FF),
-      'bg': const Color(0xFFE6F2FF),
-    },
-    {
-      'name': 'In Progress',
-      'icon': Iconsax.clock,
-      'color': const Color(0xFFFF7D53),
-      'bg': const Color(0xFFFFEFEB),
-    },
-    {
-      'name': 'Completed',
-      'icon': Iconsax.tick_circle,
-      'color': const Color(0xFF6E3BFF),
-      'bg': const Color(0xFFEBE5FF),
-    },
-  ];
+  String _selectedCategory = todoCategories.first.name;
 
   @override
   void initState() {
     super.initState();
     if (widget.todo != null) {
       _ctrl.text = widget.todo!.todo;
-      if (widget.todo!.completed) {
-        _selectedCategory = 'Completed';
-      } else {
-        if (widget.todo!.id % 2 == 0) {
-          _selectedCategory = 'In Progress';
-        } else {
-          _selectedCategory = 'To-do';
-        }
-      }
+      _selectedCategory = ref
+          .read(todoServiceProvider)
+          .deriveCategoryFromTodo(widget.todo!);
     }
   }
 
@@ -79,7 +52,9 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
           CustomSnackbar.show(context, 'Task updated successfully!');
         }
       } else {
-        await ref.read(todoListProvider.notifier).addTodo(_ctrl.text.trim());
+        await ref
+            .read(todoListProvider.notifier)
+            .addTodo(_ctrl.text.trim(), status: _selectedCategory);
         if (mounted) {
           Navigator.pop(context);
           CustomSnackbar.show(context, 'Task added successfully!');
@@ -110,19 +85,19 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            ..._categories.map(
+            ...todoCategories.map(
               (cat) => ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: cat['bg'],
+                    color: cat.background,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(cat['icon'], color: cat['color']),
+                  child: Icon(cat.icon, color: cat.color),
                 ),
-                title: Text(cat['name']),
+                title: Text(cat.name),
                 onTap: () {
-                  setState(() => _selectedCategory = cat['name']);
+                  setState(() => _selectedCategory = cat.name);
                   Navigator.pop(ctx);
                 },
               ),
@@ -135,10 +110,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentCat = _categories.firstWhere(
-      (c) => c['name'] == _selectedCategory,
-      orElse: () => _categories[0],
-    );
+    final currentCat = categoryByName(_selectedCategory);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -153,7 +125,6 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -191,7 +162,6 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      // Task Group Selector
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -225,18 +195,18 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: currentCat['bg'],
+                                      color: currentCat.background,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
-                                      currentCat['icon'],
-                                      color: currentCat['color'],
+                                      currentCat.icon,
+                                      color: currentCat.color,
                                       size: 20,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    currentCat['name'],
+                                    currentCat.name,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -257,7 +227,6 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Description Input
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
@@ -309,7 +278,6 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                 ),
               ),
 
-              // Bottom Button
               AppBottomButton(
                 text: _loading
                     ? (widget.todo != null ? 'Saving...' : 'Adding...')

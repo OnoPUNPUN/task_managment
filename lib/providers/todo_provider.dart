@@ -1,24 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/todo.dart';
 import '../repositories/todo_repository.dart';
+import '../services/todo_service.dart';
 
 final todoRepositoryProvider = Provider<TodoRepository>(
   (ref) => TodoRepository(),
 );
 
+final todoServiceProvider = Provider<TodoService>((ref) => const TodoService());
+
 final todoListProvider =
     StateNotifierProvider<TodoListNotifier, AsyncValue<List<Todo>>>(
-      (ref) => TodoListNotifier(ref.watch(todoRepositoryProvider)),
+      (ref) => TodoListNotifier(
+        ref.watch(todoRepositoryProvider),
+        ref.watch(todoServiceProvider),
+      ),
     );
 
 class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
   final TodoRepository _repo;
+  final TodoService _service;
   int _skip = 0;
   final int _limit = 10;
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
-  TodoListNotifier(this._repo) : super(const AsyncValue.loading()) {
+  TodoListNotifier(this._repo, this._service)
+    : super(const AsyncValue.loading()) {
     loadTodos(refresh: true);
   }
 
@@ -55,26 +63,14 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
 
   Future<void> addTodo(String text, {String status = 'To-do'}) async {
     try {
-      final isCompleted = status == 'Completed';
-      var newTodo = await _repo.addTodo(text); // API call
-
-      int newId = newTodo.id;
-      if (status == 'In Progress') {
-        // Need even ID
-        if (newId % 2 != 0) newId++;
-      } else if (status == 'To-do') {
-        // Need odd ID
-        if (newId % 2 == 0) newId++;
-      }
-
-      final currentIds = state.value?.map((e) => e.id).toSet() ?? {};
-      while (currentIds.contains(newId)) {
-        newId += 2;
-      }
-
-      newTodo = newTodo.copyWith(id: newId, completed: isCompleted);
-
-      state = state.whenData((list) => [newTodo, ...list]);
+      final newTodo = await _repo.addTodo(text);
+      final ids = state.value?.map((e) => e.id).toSet() ?? {};
+      final adjusted = _service.prepareNewTodo(
+        newTodo,
+        status,
+        existingIds: ids,
+      );
+      state = state.whenData((list) => [adjusted, ...list]);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -85,27 +81,22 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
     final idx = current.indexWhere((t) => t.id == id);
     if (idx == -1) return;
 
-    // Optimistic update
-    final isCompleted = status == 'Completed';
-    final updatedLocal = current[idx].copyWith(
-      todo: text,
-      completed: isCompleted,
+    final updatedLocal = _service.applyStatus(
+      current[idx],
+      text: text,
+      status: status,
     );
 
     final next = [...current]..[idx] = updatedLocal;
     state = AsyncValue.data(next);
 
     try {
-      // Parallel updates
       await Future.wait([
         _repo.updateTodo(id, text),
-        if (current[idx].completed != isCompleted)
-          _repo.updateTodoStatus(id, isCompleted),
+        if (current[idx].completed != updatedLocal.completed)
+          _repo.updateTodoStatus(id, updatedLocal.completed),
       ]);
-    } catch (e) {
-      // Revert or reload on error
-      // await loadTodos(refresh: true);
-    }
+    } catch (e) {}
   }
 
   Future<void> toggleCompleted(int id) async {
@@ -132,10 +123,7 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
             )
             .toList(),
       );
-    } catch (e) {
-      // Revert on error or reload
-      // await loadTodos(refresh: true);
-    }
+    } catch (e) {}
   }
 
   Future<void> deleteTodo(int id) async {
