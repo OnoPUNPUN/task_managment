@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
@@ -45,15 +46,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       });
       final user = User.fromJson(response.data);
       await _saveUser(user);
+      // Save credentials for local verification
+      await _saveLocalCredentials(username, password, user);
       state = AsyncValue.data(user);
     } catch (e, st) {
       // Try local login if API fails
-      final localUser = await _tryLocalLogin(username, password);
-      if (localUser != null) {
-        await _saveUser(localUser);
-        state = AsyncValue.data(localUser);
-      } else {
-        state = AsyncValue.error(e, st);
+      try {
+        final localUser = await _tryLocalLogin(username, password);
+        if (localUser != null) {
+          await _saveUser(localUser);
+          state = AsyncValue.data(localUser);
+        } else {
+          // If local login also fails, throw the original API error or a generic one
+          throw _handleError(e);
+        }
+      } catch (localError) {
+        state = AsyncValue.error(localError, st);
       }
     }
   }
@@ -65,8 +73,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final creds = jsonDecode(credsJson);
       if (creds['username'] == username && creds['password'] == password) {
         // Return the stored user object (simulated login)
-        // We might need to store the full user object with credentials or just re-hydrate it.
-        // For simplicity, let's store the full user object in 'local_user_data' when registering.
         final userDataJson = prefs.getString('local_user_data');
         if (userDataJson != null) {
           return User.fromJson(jsonDecode(userDataJson));
@@ -127,7 +133,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         await _saveLocalCredentials(username, password, localUser);
         state = AsyncValue.data(localUser);
       } catch (localError) {
-        state = AsyncValue.error(e, st);
+        state = AsyncValue.error(_handleError(e), st);
       }
     }
   }
@@ -145,11 +151,23 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     await prefs.setString('local_user_data', jsonEncode(user.toJson()));
   }
 
-  Future<void> updateProfile(
-    String firstName,
-    String lastName,
+  Future<bool> verifyPassword(String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final credsJson = prefs.getString(_localCredsKey);
+    if (credsJson != null) {
+      final creds = jsonDecode(credsJson);
+      return creds['password'] == password;
+    }
+    return false;
+  }
+
+  Future<void> updateProfile({
+    required String firstName,
+    required String lastName,
     String? imagePath,
-  ) async {
+    String? username,
+    String? password,
+  }) async {
     final currentUser = state.value;
     if (currentUser == null) return;
 
@@ -158,12 +176,30 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final updatedUser = currentUser.copyWith(
         firstName: firstName,
         lastName: lastName,
+        username: username ?? currentUser.username,
         image: imagePath ?? currentUser.image,
       );
 
       await _saveUser(updatedUser);
-      // Also update local user data if this is the local user
+
+      // Update local credentials if username or password changed
       final prefs = await SharedPreferences.getInstance();
+      final credsJson = prefs.getString(_localCredsKey);
+      String currentPassword = '';
+      if (credsJson != null) {
+        final creds = jsonDecode(credsJson);
+        currentPassword = creds['password'];
+      }
+
+      if (username != null || password != null) {
+        await _saveLocalCredentials(
+          username ?? currentUser.username,
+          password ?? currentPassword,
+          updatedUser,
+        );
+      }
+
+      // Update local user data if this is the local user
       final localData = prefs.getString('local_user_data');
       if (localData != null) {
         final localUser = User.fromJson(jsonDecode(localData));
@@ -177,8 +213,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
       state = AsyncValue.data(updatedUser);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(_handleError(e), st);
     }
+  }
+
+  String _handleError(dynamic error) {
+    if (error is DioException) {
+      if (error.response != null) {
+        final statusCode = error.response?.statusCode;
+        final data = error.response?.data;
+
+        if (statusCode == 400) {
+          if (data is Map && data.containsKey('message')) {
+            return data['message'];
+          }
+          return 'Invalid credentials or bad request.';
+        } else if (statusCode == 401) {
+          return 'Unauthorized access.';
+        } else if (statusCode == 404) {
+          return 'User not found.';
+        } else if (statusCode == 500) {
+          return 'Server error. Please try again later.';
+        }
+      }
+      return 'Network error. Please check your connection.';
+    }
+    return error.toString();
   }
 
   Future<void> logout() async {
