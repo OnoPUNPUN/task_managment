@@ -25,8 +25,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error: ${next.error}')));
-      } else if (!next.isLoading && previous?.isLoading == true) {
-        // Login successful (API call didn't throw)
+      } else if (!next.isLoading &&
+          previous?.isLoading == true &&
+          next.value != null) {
+        // Login successful (API call didn't throw and we have a user)
         Navigator.pushReplacementNamed(context, '/home');
       }
     });

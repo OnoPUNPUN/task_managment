@@ -28,7 +28,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error: ${next.error}')));
-      } else if (!next.isLoading && previous?.isLoading == true) {
+      } else if (!next.isLoading &&
+          previous?.isLoading == true &&
+          next.value != null) {
         Navigator.pushReplacementNamed(context, '/account_created');
       }
     });
