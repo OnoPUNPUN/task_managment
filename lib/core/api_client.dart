@@ -21,33 +21,38 @@ class ApiClient {
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     try {
-      return await _dio.get(path, queryParameters: queryParameters);
+      return await _dio.get(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<Response> post(String path, {dynamic data}) async {
+  Future<Response> post(String path, {dynamic data, Options? options}) async {
     try {
-      return await _dio.post(path, data: data);
+      return await _dio.post(path, data: data, options: options);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<Response> put(String path, {dynamic data}) async {
+  Future<Response> put(String path, {dynamic data, Options? options}) async {
     try {
-      return await _dio.put(path, data: data);
+      return await _dio.put(path, data: data, options: options);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
   }
 
-  Future<Response> delete(String path) async {
+  Future<Response> delete(String path, {Options? options}) async {
     try {
-      return await _dio.delete(path);
+      return await _dio.delete(path, options: options);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

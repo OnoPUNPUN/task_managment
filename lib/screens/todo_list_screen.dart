@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import '../providers/todo_provider.dart';
-import '../providers/theme_provider.dart';
+
 import '../widgets/avatar_header.dart';
 import '../widgets/date_chip.dart';
 import '../widgets/filter_chip.dart';
@@ -11,7 +11,6 @@ import '../widgets/loading.dart';
 import '../widgets/todo_card.dart';
 import '../models/todo.dart';
 import '../utils/app_date_utils.dart';
-import 'dart:math';
 
 class TodoListScreen extends ConsumerStatefulWidget {
   const TodoListScreen({super.key});
@@ -22,13 +21,12 @@ class TodoListScreen extends ConsumerStatefulWidget {
 class _TodoListScreenState extends ConsumerState<TodoListScreen> {
   int _selectedDateIndex = 2;
   String _selectedFilter = 'All';
-  late int _avatarId;
+
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _avatarId = Random().nextInt(70);
     _scrollController.addListener(_onScroll);
   }
 
@@ -99,14 +97,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      AvatarHeader(
-                        name: 'Livia Vaccaro',
-                        avatar: NetworkImage(
-                          'https://i.pravatar.cc/150?img=$_avatarId',
-                        ),
-                        onToggleTheme: () =>
-                            ref.read(themeNotifierProvider.notifier).toggle(),
-                      ),
+                      const AvatarHeader(),
                       const SizedBox(height: 24),
                     ],
                   ),

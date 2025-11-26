@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_managment/widgets/app_bottom_button.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -113,8 +114,14 @@ class OnboardingScreen extends StatelessWidget {
 
                 AppBottomButton(
                   text: 'Let’s Start',
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, "/home");
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    // Clear any existing session to prevent "Guest" state
+                    await prefs.remove('user_data');
+                    await prefs.setBool("first_time", false);
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, "/login");
+                    }
                   },
                   hasArrow: true,
                 ),
