@@ -86,14 +86,8 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
   }
 
   Future<void> addTodo(String text, {String status = 'To-do'}) async {
-    final effectiveUserId = userId ?? 5;
-
     try {
-      final newTodo = await _repo.addTodo(
-        text,
-        userId: effectiveUserId,
-        token: token,
-      );
+      final newTodo = await _repo.addTodo(text, userId: 5, token: token);
       final ids = state.value?.map((e) => e.id).toSet() ?? {};
       final adjusted = _service.prepareNewTodo(
         newTodo,

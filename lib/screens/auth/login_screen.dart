@@ -40,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       } else if (!next.isLoading &&
           previous?.isLoading == true &&
           next.value != null) {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     });
 
@@ -66,7 +66,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: theme.textTheme.titleLarge?.color ?? const Color(0xFF222222),
+                    color:
+                        theme.textTheme.titleLarge?.color ??
+                        const Color(0xFF222222),
                   ),
                   textAlign: TextAlign.center,
                 ),

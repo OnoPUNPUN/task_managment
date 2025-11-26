@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,13 +45,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final status = await Permission.photos.request();
 
-    if (pickedFile != null) {
-      setState(() {
-        _imagePath = pickedFile.path;
-      });
+    if (status.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _imagePath = pickedFile.path;
+        });
+      }
+    } else if (status.isDenied) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permission is required to pick an image'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
     }
   }
 
@@ -110,9 +125,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.dividerColor.withOpacity(0.4),
-                          ),
+                            border: Border.all(
+                              color: theme.dividerColor.withOpacity(0.4),
+                            ),
                             image: DecorationImage(
                               image:
                                   _imagePath != null &&
@@ -156,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                  color: theme.textTheme.titleLarge?.color,
+                    color: theme.textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -191,7 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                  color: theme.textTheme.titleLarge?.color,
+                    color: theme.textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -236,7 +251,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(16),
@@ -267,7 +285,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             'Switch between light and dark themes',
                             style: GoogleFonts.lexendDeca(
                               fontSize: 13,
-                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -275,7 +294,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Switch(
                         value: isDarkMode,
                         onChanged: (value) {
-                          ref.read(themeNotifierProvider.notifier).setMode(
+                          ref
+                              .read(themeNotifierProvider.notifier)
+                              .setMode(
                                 value ? ThemeMode.dark : ThemeMode.light,
                               );
                         },
