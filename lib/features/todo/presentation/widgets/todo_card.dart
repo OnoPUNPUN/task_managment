@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:popover/popover.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/todo.dart';
-import '../providers/todo_provider.dart';
+import 'package:task_managment/features/todo/domain/entities/todo.dart';
+import 'package:task_managment/features/todo/presentation/providers/todo_provider.dart';
 
 class TodoCard extends StatelessWidget {
   final Todo todo;
@@ -14,6 +14,10 @@ class TodoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final completed = todo.completed;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black87;
+    final mutedColor =
+        theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey.shade500;
 
     String statusText = completed ? 'Done' : 'To-do';
     Color statusBg = completed
@@ -51,7 +55,7 @@ class TodoCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
         ),
         padding: const EdgeInsets.all(20),
@@ -67,16 +71,16 @@ class TodoCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey[500],
+                      color: mutedColor,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     todo.todo,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: textColor,
                       height: 1.3,
                     ),
                     maxLines: 2,

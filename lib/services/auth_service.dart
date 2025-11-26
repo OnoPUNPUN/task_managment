@@ -7,7 +7,6 @@ class AuthService {
   final String _baseUrl = 'https://dummyjson.com';
 
   AuthService() {
-    // Ignore SSL certificate errors
     (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
       client.badCertificateCallback =

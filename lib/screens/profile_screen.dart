@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import '../providers/auth_provider.dart';
+import 'package:task_managment/providers/auth_provider.dart';
+import 'package:task_managment/providers/theme_provider.dart';
 import '../widgets/app_bottom_button.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -57,21 +58,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.value;
+    final themeMode = ref.watch(themeNotifierProvider);
+    final isDarkMode = themeMode == ThemeMode.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Edit Profile',
           style: GoogleFonts.lexendDeca(
-            color: Colors.black,
+            color: theme.textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -106,7 +110,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(
+                            color: theme.dividerColor.withOpacity(0.4),
+                          ),
                             image: DecorationImage(
                               image:
                                   _imagePath != null &&
@@ -150,6 +156,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                  color: theme.textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -184,6 +191,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                  color: theme.textTheme.titleLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -218,12 +226,72 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                 ),
                 const SizedBox(height: 32),
+                Text(
+                  'Appearance',
+                  style: GoogleFonts.lexendDeca(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.titleLarge?.color,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Dark Mode',
+                            style: GoogleFonts.lexendDeca(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Switch between light and dark themes',
+                            style: GoogleFonts.lexendDeca(
+                              fontSize: 13,
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: isDarkMode,
+                        onChanged: (value) {
+                          ref.read(themeNotifierProvider.notifier).setMode(
+                                value ? ThemeMode.dark : ThemeMode.light,
+                              );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(
+                      color: theme.dividerColor.withOpacity(0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +329,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         hasArrow: false,
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            // Verify password first
                             final isVerified = await ref
                                 .read(authProvider.notifier)
                                 .verifyPassword(
@@ -299,7 +366,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                             );
 
-                            // Clear sensitive fields
                             _currentPasswordController.clear();
                             _passwordController.clear();
                           }

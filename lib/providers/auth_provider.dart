@@ -46,18 +46,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       });
       final user = User.fromJson(response.data);
       await _saveUser(user);
-      // Save credentials for local verification
       await _saveLocalCredentials(username, password, user);
       state = AsyncValue.data(user);
     } catch (e, st) {
-      // Try local login if API fails
       try {
         final localUser = await _tryLocalLogin(username, password);
         if (localUser != null) {
           await _saveUser(localUser);
           state = AsyncValue.data(localUser);
         } else {
-          // If local login also fails, throw the original API error or a generic one
           throw _handleError(e);
         }
       } catch (localError) {
@@ -72,7 +69,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     if (credsJson != null) {
       final creds = jsonDecode(credsJson);
       if (creds['username'] == username && creds['password'] == password) {
-        // Return the stored user object (simulated login)
         final userDataJson = prefs.getString('local_user_data');
         if (userDataJson != null) {
           return User.fromJson(jsonDecode(userDataJson));
@@ -103,7 +99,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         userData['token'] =
             'simulated-token-${DateTime.now().millisecondsSinceEpoch}';
       }
-      // Ensure ID is unique-ish if 0 is returned or collision likely
       if (userData['id'] == null || userData['id'] == 0) {
         userData['id'] = DateTime.now().millisecondsSinceEpoch;
       }
@@ -111,21 +106,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final user = User.fromJson(userData);
       await _saveUser(user);
 
-      // Save local credentials for future login
       await _saveLocalCredentials(username, password, user);
 
       state = AsyncValue.data(user);
     } catch (e, st) {
-      // Fallback to local registration if API fails
       try {
         final localUser = User(
           id: DateTime.now().millisecondsSinceEpoch,
           username: username,
-          email: '$username@example.com', // Placeholder
+          email: '$username@example.com',
           firstName: firstName,
           lastName: lastName,
           gender: 'unknown',
-          image: '', // Default or empty
+          image: '',
           token: 'local-token-${DateTime.now().millisecondsSinceEpoch}',
         );
 
@@ -182,7 +175,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
       await _saveUser(updatedUser);
 
-      // Update local credentials if username or password changed
       final prefs = await SharedPreferences.getInstance();
       final credsJson = prefs.getString(_localCredsKey);
       String currentPassword = '';
@@ -199,7 +191,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         );
       }
 
-      // Update local user data if this is the local user
       final localData = prefs.getString('local_user_data');
       if (localData != null) {
         final localUser = User.fromJson(jsonDecode(localData));

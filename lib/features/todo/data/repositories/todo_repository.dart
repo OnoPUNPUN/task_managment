@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import '../core/api_client.dart';
-import '../core/exceptions.dart';
-import '../models/todo.dart';
+import 'package:task_managment/core/api_client.dart';
+import 'package:task_managment/core/exceptions.dart';
+import 'package:task_managment/features/todo/domain/entities/todo.dart';
 
 class TodoRepository {
   final ApiClient _client = ApiClient();
@@ -9,12 +9,10 @@ class TodoRepository {
   Future<List<Todo>> fetchTodos({
     int limit = 0,
     int skip = 0,
-    int?
-    userId, // Kept for signature compatibility but ignored for endpoint selection
+    int? userId,
     String? token,
   }) async {
     try {
-      // ALWAYS use the generic endpoint as requested
       const endpoint = '/todos';
       final res = await _client.get(
         endpoint,
@@ -22,7 +20,6 @@ class TodoRepository {
           if (limit > 0) 'limit': limit,
           if (skip > 0) 'skip': skip,
         },
-        // Token is optional for generic public API but we keep it if passed
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
@@ -48,7 +45,6 @@ class TodoRepository {
     try {
       final res = await _client.post(
         '/todos/add',
-        // Use the passed userId, or default to 5 if 0/null (though required int implies value)
         data: {'todo': text, 'completed': false, 'userId': userId},
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})

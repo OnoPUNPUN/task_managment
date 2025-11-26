@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../providers/auth_provider.dart';
+import 'package:task_managment/providers/auth_provider.dart';
 import '../../widgets/app_bottom_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -33,6 +33,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final theme = Theme.of(context);
 
     ref.listen(authProvider, (previous, next) {
       if (next.hasError) {
@@ -50,12 +51,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -78,7 +79,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   style: GoogleFonts.lexendDeca(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF222222),
+                    color: theme.textTheme.titleLarge?.color ?? const Color(0xFF222222),
                   ),
                   textAlign: TextAlign.center,
                 ),

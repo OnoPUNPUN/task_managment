@@ -8,10 +8,27 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? const [Color(0xFF0F1115), Color(0xFF1C1F26)]
+        : const [Color(0xFFF3F8FF), Color(0xFFFFFBF3)];
+    final titleColor = theme.textTheme.titleLarge?.color ?? const Color(0xFF222222);
+    final subtitleColor =
+        theme.textTheme.bodyMedium?.color ?? const Color(0xFF6E6E6E);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
           Positioned(
             top: 120,
             left: 80,
@@ -85,10 +102,10 @@ class OnboardingScreen extends StatelessWidget {
                     "Task Management &\nTo-Do List",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.lexendDeca(
-                      textStyle: const TextStyle(
+                      textStyle: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF222222),
+                        color: titleColor,
                         height: 1.2,
                       ),
                     ),
@@ -104,7 +121,7 @@ class OnboardingScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.lexendDeca(
                       fontSize: 15,
-                      color: Color(0xFF6E6E6E),
+                      color: subtitleColor,
                       height: 1.5,
                     ),
                   ),
@@ -116,7 +133,6 @@ class OnboardingScreen extends StatelessWidget {
                   text: 'Let’s Start',
                   onPressed: () async {
                     final prefs = await SharedPreferences.getInstance();
-                    // Clear any existing session to prevent "Guest" state
                     await prefs.remove('user_data');
                     await prefs.setBool("first_time", false);
                     if (context.mounted) {

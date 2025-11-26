@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/auth_provider.dart';
+import 'package:task_managment/providers/auth_provider.dart';
 
 class AvatarHeader extends ConsumerWidget {
   const AvatarHeader({super.key});
@@ -11,6 +11,8 @@ class AvatarHeader extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.value;
     final name = user != null ? '${user.firstName} ${user.lastName}' : 'Guest';
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black87;
 
     ImageProvider? imageProvider;
     if (user?.image != null && user!.image.isNotEmpty) {
@@ -21,7 +23,6 @@ class AvatarHeader extends ConsumerWidget {
       }
     }
 
-    // Fallback
     imageProvider ??= const AssetImage('assets/profile/default_profile.png');
 
     return Padding(
@@ -35,10 +36,10 @@ class AvatarHeader extends ConsumerWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: theme.cardColor, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withOpacity(0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -55,17 +56,17 @@ class AvatarHeader extends ConsumerWidget {
                 'Hello!',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                   fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: textColor,
                   letterSpacing: -0.5,
                 ),
               ),

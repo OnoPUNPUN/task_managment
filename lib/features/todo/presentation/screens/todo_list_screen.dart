@@ -1,16 +1,15 @@
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
-import '../providers/todo_provider.dart';
-
-import '../widgets/avatar_header.dart';
-import '../widgets/date_chip.dart';
-import '../widgets/filter_chip.dart';
-import '../widgets/loading.dart';
-import '../widgets/todo_card.dart';
-import '../models/todo.dart';
-import '../utils/app_date_utils.dart';
+import 'package:task_managment/features/todo/domain/entities/todo.dart';
+import 'package:task_managment/features/todo/domain/utils/app_date_utils.dart';
+import 'package:task_managment/features/todo/presentation/providers/todo_provider.dart';
+import 'package:task_managment/features/todo/presentation/widgets/todo_card.dart';
+import 'package:task_managment/widgets/avatar_header.dart';
+import 'package:task_managment/widgets/date_chip.dart';
+import 'package:task_managment/widgets/filter_chip.dart';
+import 'package:task_managment/widgets/loading.dart';
 
 class TodoListScreen extends ConsumerStatefulWidget {
   const TodoListScreen({super.key});
@@ -48,13 +47,18 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
     final todosAsync = ref.watch(todoListProvider);
     final todoService = ref.watch(todoServiceProvider);
     final dates = generateSurroundingDates(anchor: DateTime.now());
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? const [Color(0xFF0F1115), Color(0xFF1C1F26)]
+        : const [Color(0xFFF3F8FF), Color(0xFFFFFBF3)];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFF3F8FF), Color(0xFFFFFBF3)],
+            colors: gradientColors,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -135,6 +139,9 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                     selectedFilter: _selectedFilter,
                     onFilterSelected: (label) =>
                         setState(() => _selectedFilter = label),
+                    backgroundColor: isDark
+                        ? const Color(0xFF161C27)
+                        : const Color(0xFFF3F8FF),
                   ),
                 ),
                 todosAsync.when(
@@ -225,10 +232,12 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
 class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
   final String selectedFilter;
   final ValueChanged<String> onFilterSelected;
+  final Color backgroundColor;
 
   _FilterBarDelegate({
     required this.selectedFilter,
     required this.onFilterSelected,
+    required this.backgroundColor,
   });
 
   @override
@@ -238,10 +247,8 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Container(
-      color: const Color(0xFFF3F8FF), // Match top gradient color for stickiness
-      padding: const EdgeInsets.symmetric(
-        vertical: 8,
-      ), // Add some vertical padding
+      color: backgroundColor,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: SizedBox(
         height: 50,
         child: ListView.separated(
@@ -264,13 +271,14 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 66; // 50 height + 16 vertical padding
+  double get maxExtent => 66;
 
   @override
   double get minExtent => 66;
 
   @override
   bool shouldRebuild(covariant _FilterBarDelegate oldDelegate) {
-    return oldDelegate.selectedFilter != selectedFilter;
+    return oldDelegate.selectedFilter != selectedFilter ||
+        oldDelegate.backgroundColor != backgroundColor;
   }
 }

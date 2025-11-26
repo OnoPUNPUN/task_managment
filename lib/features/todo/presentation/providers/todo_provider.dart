@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/todo.dart';
-import '../repositories/todo_repository.dart';
-import '../services/todo_service.dart';
-import 'auth_provider.dart';
+import 'package:task_managment/features/todo/data/repositories/todo_repository.dart';
+import 'package:task_managment/features/todo/domain/entities/todo.dart';
+import 'package:task_managment/features/todo/domain/services/todo_service.dart';
+import 'package:task_managment/providers/auth_provider.dart';
 
 final todoRepositoryProvider = Provider<TodoRepository>(
   (ref) => TodoRepository(),
@@ -46,12 +46,6 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
   }
 
   Future<void> loadTodos({bool refresh = false}) async {
-    // Allow loading generic todos even if userId is null
-    // if (userId == null) {
-    //   state = const AsyncValue.data([]);
-    //   return;
-    // }
-
     if (refresh) {
       _skip = 0;
       _hasMore = true;
@@ -92,8 +86,7 @@ class TodoListNotifier extends StateNotifier<AsyncValue<List<Todo>>> {
   }
 
   Future<void> addTodo(String text, {String status = 'To-do'}) async {
-    // if (userId == null) return; // Allow adding with default ID
-    final effectiveUserId = userId ?? 5; // Default to 5 if not logged in
+    final effectiveUserId = userId ?? 5;
 
     try {
       final newTodo = await _repo.addTodo(

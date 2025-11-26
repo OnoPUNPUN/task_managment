@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/todo_provider.dart';
-import '../widgets/custom_snackbar.dart';
-import '../widgets/app_bottom_button.dart';
-import '../models/todo.dart';
-import '../constants/todo_categories.dart';
+import 'package:task_managment/features/todo/domain/constants/todo_categories.dart';
+import 'package:task_managment/features/todo/domain/entities/todo.dart';
+import 'package:task_managment/features/todo/presentation/providers/todo_provider.dart';
+import 'package:task_managment/widgets/app_bottom_button.dart';
+import 'package:task_managment/widgets/custom_snackbar.dart';
 
 class AddTodoScreen extends ConsumerStatefulWidget {
   final Todo? todo;
@@ -111,13 +111,23 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
   @override
   Widget build(BuildContext context) {
     final currentCat = categoryByName(_selectedCategory);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? const [Color(0xFF0F1115), Color(0xFF1C1F26)]
+        : const [Color(0xFFF3F8FF), Color(0xFFFFFBF3)];
+    final primaryTextColor = theme.textTheme.bodyLarge?.color ?? Colors.black87;
+    final secondaryTextColor =
+        theme.textTheme.bodyMedium?.color?.withOpacity(0.7) ??
+            Colors.grey.shade500;
+    final cardColor = theme.cardColor;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFF3F8FF), Color(0xFFFFFBF3)],
+            colors: gradientColors,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -137,18 +147,18 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                       alignment: Alignment.centerLeft,
                       child: IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: Colors.black87,
+                          color: theme.iconTheme.color,
                         ),
                       ),
                     ),
                     Text(
                       widget.todo != null ? 'Edit Task' : 'Add Task',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: primaryTextColor,
                       ),
                     ),
                   ],
@@ -166,11 +176,11 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -183,7 +193,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                               'Task Group',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[500],
+                                color: secondaryTextColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -207,16 +217,16 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                                   const SizedBox(width: 12),
                                   Text(
                                     currentCat.name,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                   const Spacer(),
                                   Icon(
                                     Icons.keyboard_arrow_down,
-                                    color: Colors.grey[400],
+                                    color: secondaryTextColor,
                                   ),
                                 ],
                               ),
@@ -231,11 +241,11 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -248,7 +258,7 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                               'Description',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[500],
+                                color: secondaryTextColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -256,16 +266,16 @@ class _AddTodoScreenState extends ConsumerState<AddTodoScreen> {
                             TextField(
                               controller: _ctrl,
                               maxLines: 6,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black87,
+                                color: primaryTextColor,
                                 height: 1.5,
                               ),
                               decoration: InputDecoration.collapsed(
                                 hintText:
                                     'This application is designed for super shops...',
                                 hintStyle: TextStyle(
-                                  color: Colors.grey[400],
+                                  color: secondaryTextColor,
                                   fontSize: 16,
                                 ),
                               ),
