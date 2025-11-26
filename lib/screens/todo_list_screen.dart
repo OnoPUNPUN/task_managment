@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import '../providers/todo_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/avatar_header.dart';
@@ -127,10 +129,37 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                     if (filtered.isEmpty)
                       return const Center(child: Text('No tasks found'));
 
-                    return RefreshIndicator(
+                    return CustomRefreshIndicator(
                       onRefresh: () => ref
                           .read(todoListProvider.notifier)
                           .loadTodos(refresh: true),
+                      builder:
+                          (
+                            BuildContext context,
+                            Widget child,
+                            IndicatorController controller,
+                          ) {
+                            return Stack(
+                              alignment: Alignment.topCenter,
+                              children: [
+                                if (!controller.isIdle)
+                                  Positioned(
+                                    top: 35 * controller.value,
+                                    child: SizedBox(
+                                      width: 50,
+                                      height: 50,
+                                      child: Lottie.asset(
+                                        'assets/animations/loading/blue_loading.json',
+                                      ),
+                                    ),
+                                  ),
+                                Transform.translate(
+                                  offset: Offset(0, 100.0 * controller.value),
+                                  child: child,
+                                ),
+                              ],
+                            );
+                          },
                       child: ListView.separated(
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
@@ -138,14 +167,14 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (ctx, i) {
                           if (i == filtered.length) {
-                            return const Padding(
-                              padding: EdgeInsets.all(16.0),
+                            return Padding(
+                              padding: const EdgeInsets.all(16.0),
                               child: Center(
                                 child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                  width: 50,
+                                  height: 50,
+                                  child: Lottie.asset(
+                                    'assets/animations/loading/blue_loading.json',
                                   ),
                                 ),
                               ),

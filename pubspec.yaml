@@ -19,6 +19,8 @@ dependencies:
   iconsax_flutter: ^1.0.1
   popover: ^0.4.0
   permission_handler: ^12.0.1
+  lottie: ^3.3.2
+  custom_refresh_indicator: ^4.0.1
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +32,4 @@ flutter:
 
   assets:
     - assets/onBorading/
+    - assets/animations/loading/
