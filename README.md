@@ -8,23 +8,35 @@ This productive tool is designed to help you better manage your tasks project-wi
 
 ### ✨ Key Features
 
+- **Authentication System** - Secure login and registration with local storage
+- **User Profile Management** - Edit profile with avatar upload, name, and password changes
+- **Dark Mode Support** - Switch between light and dark themes
 - **Task Organization** - Categorize tasks with different status labels (To-do, In Progress, Completed)
 - **Calendar Integration** - View and manage tasks by date
-- **User Profile** - Personalized dashboard with user information
 - **Task Categories** - Organize tasks with icons and visual indicators
 - **Real-time Updates** - See task creation time and status updates
 - **Easy Task Management** - Add, edit, and delete tasks with simple gestures
 
 ## 📸 Screenshots
 
+### Authentication & Onboarding
 <div align="center">
   <img src="screenshots/s1.png" width="250" alt="Onboarding Screen"/>
-  <img src="screenshots/s2.png" width="250" alt="Dashboard"/>
-  <img src="screenshots/s3.png" width="250" alt="Add Task"/>
+  <img src="screenshots/s6.png" width="250" alt="Login Screen"/>
+  <img src="screenshots/s7.png" width="250" alt="Register Screen"/>
 </div>
 
+### Task Management
 <div align="center">
+  <img src="screenshots/s2.png" width="250" alt="Dashboard"/>
+  <img src="screenshots/s3.png" width="250" alt="Add Task"/>
   <img src="screenshots/s4.png" width="250" alt="Task Options"/>
+</div>
+
+### Profile & Settings
+<div align="center">
+  <img src="screenshots/s8.png" width="250" alt="Account Created"/>
+  <img src="screenshots/s9.png" width="250" alt="Edit Profile"/>
   <img src="screenshots/s5.png" width="250" alt="Edit Task"/>
 </div>
 
@@ -34,41 +46,69 @@ This productive tool is designed to help you better manage your tasks project-wi
 - **Language:** Dart
 - **Architecture:** Clean Architecture with Provider/Riverpod pattern
 - **State Management:** Provider
-- **Local Storage:** For task persistence
+- **Local Storage:** Shared Preferences (for authentication and user data)
+- **Authentication:** Local authentication system
 
 ## 📁 Project Structure
 
 ```
 lib/
-├── constants/         # App-wide constants
-├── core/             # Core functionality and utilities
+├── app/
+│   ├── app.dart
+│   ├── bootstrap.dart
+│   └── router.dart
+├── constants/
+│   └── todo_categories.dart
+├── core/
 │   ├── api_client.dart
 │   └── exceptions.dart
-├── models/           # Data models
-│   └── todo.dart
-├── providers/        # State management
-│   ├── theme_provider.dart
-│   └── todo_provider.dart
-├── repositories/     # Data repositories
-│   └── todo_repository.dart
-├── screens/          # UI screens
-│   ├── add_todo_screen.dart
-│   ├── onboarding_screen.dart
-│   └── todo_list_screen.dart
-├── services/         # Business logic services
-│   └── todo_service.dart
-├── utils/            # Utility functions
-│   └── app_date_utils.dart
-└── widgets/          # Reusable widgets
-    ├── app_bottom_button.dart
-    ├── avatar_header.dart
-    ├── custom_snackbar.dart
-    ├── date_chip.dart
-    ├── filter_chip.dart
-    ├── loading.dart
-    ├── todo_card.dart
-    ├── app_theme.dart
-    └── main.dart
+├── features/
+│   └── todo/
+│       ├── data/
+│       │   └── repositories/
+│       │       └── todo_repository.dart
+│       ├── domain/
+│       │   ├── constants/
+│       │   │   └── todo_categories.dart
+│       │   ├── entities/
+│       │   │   └── todo.dart
+│       │   ├── services/
+│       │   │   └── todo_service.dart
+│       │   └── utils/
+│       │       └── app_date_utils.dart
+│       └── presentation/
+│           ├── providers/
+│           │   └── todo_provider.dart
+│           ├── screens/
+│           │   ├── add_todo_screen.dart
+│           │   └── todo_list_screen.dart
+│           └── widgets/
+│               └── todo_card.dart
+├── models/
+│   └── user.dart
+├── providers/
+│   ├── auth_provider.dart
+│   └── theme_provider.dart
+├── repositories/
+│   └── screens/
+│       └── auth/
+│           ├── account_created_screen.dart
+│           ├── login_screen.dart
+│           ├── register_screen.dart
+│           ├── onboarding_screen.dart
+│           └── profile_screen.dart
+├── services/
+│   └── auth_service.dart
+├── utils/
+│   └── widgets/
+│       ├── app_bottom_button.dart
+│       ├── avatar_header.dart
+│       ├── custom_snackbar.dart
+│       ├── date_chip.dart
+│       ├── filter_chip.dart
+│       ├── loading.dart
+│       ├── app_theme.dart
+│       └── main.dart
 ```
 
 ## 🌿 Branches
@@ -77,6 +117,7 @@ lib/
 - `onboarding_screen` - Onboarding screen implementation
 - `dashboard` - Main dashboard and task list features
 - `add_Todo` - Task creation and editing functionality
+- `auth` - Authentication system with login/register
 
 ## 🚀 Getting Started
 
@@ -111,10 +152,24 @@ flutter run
 
 ## 📱 Features in Detail
 
+### Authentication System
+- Secure login with username and password
+- User registration with form validation
+- Account creation confirmation screen
+- Local authentication storage
+- Session management
+
+### User Profile Management
+- Edit personal information (First Name, Last Name)
+- Change username
+- Update password with confirmation
+- Avatar/profile picture upload
+- Dark mode toggle in profile settings
+
 ### Onboarding Experience
 - Welcoming screen with engaging 3D illustration
 - Clear value proposition
-- Smooth transition to main app
+- Smooth transition to login/register
 
 ### Dashboard
 - Calendar view for date-based task filtering
